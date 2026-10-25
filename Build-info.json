@@ -3,26 +3,26 @@
   "source": {
     "repository": "nthack/Shadowrocket-ADBlock-Rules-Easy",
     "branch": "master",
-    "commit": "cc14d9db68bf81aafccb26f99e8ae6badf31937f",
-    "committed_at": "2026-10-25T13:01:28Z",
-    "url": "https://raw.githubusercontent.com/nthack/Shadowrocket-ADBlock-Rules-Easy/cc14d9db68bf81aafccb26f99e8ae6badf31937f/sr_banlist_ad.conf",
-    "sha256": "b8b5f2f87ad23fdfa564dba8c18971f7a5a47fc427a0a4ec5ffcb968e637925d",
-    "bytes": 2466941
+    "commit": "675eb272f69069ac8f2b32159cd499fdd1064219",
+    "committed_at": "2026-10-25T18:46:58Z",
+    "url": "https://raw.githubusercontent.com/nthack/Shadowrocket-ADBlock-Rules-Easy/675eb272f69069ac8f2b32159cd499fdd1064219/sr_banlist_ad.conf",
+    "sha256": "187eb694c6a61571acf4de5bd2ca42668408f616a5c90762f14302a11c1dbcd4",
+    "bytes": 2470414
   },
   "inputs": {
     "local_sha256": "f4a04e35ae5faf29c808d0f068278f8c97e7728971c8ee25a88b9bb5f9f9111c",
     "custom_sha256": "704f10d24a2737c7ab6f206667e45e67061843e9c1971bac83639c0f4d45b2af"
   },
   "rules": {
-    "upstream": 62653,
+    "upstream": 62738,
     "custom": 71,
     "removed": 5,
-    "merged": 62719
+    "merged": 62804
   },
   "output": {
     "filename": "sr_ios_adblock.conf",
-    "sha256": "d364ccfb05c62b67f10183bbab282ccdb87846a0c28735dd742a39f0b1fe0f12",
-    "bytes": 2470764
+    "sha256": "c860cce84fdb679bbd848e093cc02a1201d5d5a3b643041ecfc491d0442fa643",
+    "bytes": 2474237
   },
   "validation": "bounded static checks only; iOS verification required"
 }
