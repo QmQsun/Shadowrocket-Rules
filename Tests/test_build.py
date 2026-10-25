@@ -23,7 +23,7 @@ class BuildTests(unittest.TestCase):
                        self.custom if custom is None else custom, {"mode": "test"}, previous)
 
     def test_real_snapshot_reconciles_and_repeats(self):
-        self.assertEqual(self.info["rules"], {"upstream": 62653, "custom": 64, "removed": 5, "merged": 62712})
+        self.assertEqual(self.info["rules"], {"upstream": 62653, "custom": 71, "removed": 5, "merged": 62719})
         self.assertEqual(self.make(), (self.output, self.info))
         self.assertEqual(b.sha256(self.output), self.info["output"]["sha256"])
 
@@ -56,12 +56,37 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(b.route(self.merged, host="ip.net.coffee", protocol="UDP", port=3478), "PROXY")
         self.assertEqual(b.route(self.merged, host="ip.net.coffee", protocol="TCP"), "PROXY")
 
+    def test_additional_service_domains_use_proxy_without_expanding_udp_block(self):
+        rules = [b.parse_rule(x) for x in b.active(self.custom.splitlines())] + [b.parse_rule("FINAL,DIRECT")]
+        for domain in ("oaistatic.com", "oaiusercontent.com", "hf.co", "groq.com", "recaptcha.net"):
+            with self.subTest(domain=domain):
+                for host in (domain, "cdn." + domain):
+                    self.assertEqual(b.route(self.merged, host=host), "PROXY")
+                    self.assertEqual(b.route(self.merged, host=host, protocol="UDP"), "PROXY")
+                for host in ("not" + domain, domain + ".example"):
+                    self.assertEqual(b.route(rules, host=host), "DIRECT")
+
+    def test_ip_quic_rejection_requires_matching_network_protocol_and_port(self):
+        rules = [b.parse_rule(x) for x in b.active(self.custom.splitlines())] + [b.parse_rule("FINAL,DIRECT")]
+        for address in ("160.79.104.0", "160.79.105.255", "2607:6bc0::", "2607:6bc0:0:ffff:ffff:ffff:ffff:ffff"):
+            with self.subTest(address=address):
+                self.assertEqual(b.route(rules, ip=address, protocol="UDP"), "REJECT-NO-DROP")
+                self.assertEqual(b.route(rules, ip=address, protocol="TCP"), "PROXY")
+                self.assertEqual(b.route(rules, ip=address, protocol="UDP", port=3478), "PROXY")
+        for address in ("160.79.103.255", "160.79.106.0", "2607:6bc0:1::1", "1.1.1.1"):
+            self.assertEqual(b.route(rules, ip=address, protocol="UDP"), "DIRECT")
+        self.assertEqual(b.route(rules, host="unrelated.example", protocol="UDP"), "DIRECT")
+
+    def test_existing_ad_blocks_and_default_route_stay_intact(self):
+        for domain in ("google-analytics.com", "googlesyndication.com", "gvt2.com"):
+            self.assertEqual(b.route(self.merged, host=domain), "REJECT")
+        self.assertEqual(b.route(self.merged, host="unrelated.example"), "DIRECT")
+
     def test_ipv4_ipv6_fallback_and_boundaries(self):
         rules = [b.parse_rule(x) for x in b.active(self.custom.splitlines())] + [b.parse_rule("FINAL,DIRECT")]
         for address in ("160.79.104.0", "160.79.105.255", "2607:6bc0::1", "2607:6bc0:0:ffff::1"):
             self.assertEqual(b.route(rules, ip=address), "PROXY")
-            # IP-only QUIC remains PROXY; never falsely claim equivalent domain rejection.
-            self.assertEqual(b.route(rules, ip=address, protocol="UDP"), "PROXY")
+            self.assertEqual(b.route(rules, ip=address, protocol="UDP"), "REJECT-NO-DROP")
         for address in ("160.79.103.255", "160.79.106.0", "2607:6bc0:1::1"):
             self.assertEqual(b.route(rules, ip=address), "DIRECT")
 
@@ -78,7 +103,13 @@ class BuildTests(unittest.TestCase):
         selectors = {(x[0], x[1]) for x in map(b.parse_rule, b.active(self.custom.splitlines()))}
         expected = [line for line in original if b.parse_rule(line)[:2] not in selectors]
         merged = b.active(b.sections(self.output.decode(), ["General", "Rule", "URL Rewrite"])["Rule"])
-        self.assertEqual(merged[64:], expected)
+        self.assertEqual(merged[71:], expected)
+
+    def test_logical_ip_rule_requires_no_resolve_and_valid_network(self):
+        for condition in ("IP-CIDR,garbage,no-resolve", "IP-CIDR,160.79.104.0/23",
+                          "IP-CIDR6,2607:6bc0::/48,no-resolve"):
+            with self.subTest(condition=condition), self.assertRaises(b.BuildError):
+                b.parse_rule(f"AND,((PROTOCOL,UDP),(DST-PORT,443),({condition})),REJECT-NO-DROP")
 
     def test_final_unique_and_last(self):
         b.validate_final(self.merged)

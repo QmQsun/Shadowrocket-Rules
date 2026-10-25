@@ -12,6 +12,7 @@
 - SHA256：`b8b5f2f87ad23fdfa564dba8c18971f7a5a47fc427a0a4ec5ffcb968e637925d`
 - 结构：`General`、`Rule`、`URL Rewrite`；62,653 条规则。
 - 首次合并：62,653 + 64 - 5 = 62,712 条规则。
+- 当前固定快照合并：62,653 + 71 - 5 = 62,719 条规则；增加五条服务资源代理规则及两条定向 UDP 443 网段规则。
 
 原始快照逐字节保存。注释中存在上游原有的乱码，不影响规则正文，也未据此重写上游内容。
 
@@ -22,6 +23,7 @@
 - `PROTOCOL` 是逻辑规则的子条件，使用 `PROTOCOL,UDP`。
 - `AND` 组合协议、端口及域名条件；`REJECT-NO-DROP` 返回 ICMP 端口不可达。
 - `IP-CIDR` 同时用于 IPv4 和 IPv6，`no-resolve` 避免该规则主动触发域名解析。
+- 网段定向 UDP 443 使用 `AND` 组合 `PROTOCOL`、`DST-PORT` 与 `IP-CIDR`；IP 子条件保留 `no-resolve`。IP 子规则内使用该选项的配置参考：[Shadowrocket 模块维护者示例](https://github.com/semomanli/Shadowrocket/blob/main/Release/Module.sgmodule)。这是语法组合依据，实际内核接受情况仍需手机导入验证。
 - UDP 匹配到不支持 UDP 的代理时，`udp-policy-not-supported-behaviour = REJECT` 拒绝转发。
 
 保留已有通用设置不代表 DNS 已强制经过代理。静态匹配器只覆盖本项目已审阅的语法，不模拟 DNS、SNI 识别、内核优先级或真实出口。实际设备行为仍需连接日志验证。

@@ -1,6 +1,6 @@
 # Local priority rules, applied before upstream ad/IP/domain rules.
 # Shadowrocket uses PROTOCOL,UDP inside logical rules, not Clash NETWORK,udp.
-# Targeted UDP/443 rejection only when these domain conditions match.
+# Targeted UDP/443 rejection only for the listed domains and ingress networks.
 # This does not block all UDP/STUN and does not prove WebRTC/DNS leak protection.
 AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.ai)),REJECT-NO-DROP
 AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.com)),REJECT-NO-DROP
@@ -33,6 +33,8 @@ AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,segment.io)),REJECT-NO-DROP
 AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,segment.com)),REJECT-NO-DROP
 AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.com)),REJECT-NO-DROP
 AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.network)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,160.79.104.0/23,no-resolve)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,2607:6bc0::/48,no-resolve)),REJECT-NO-DROP
 
 # Core, content, telemetry, payment, verification, support, and test-site routing.
 # Service-specific hosts remain narrow on shared hosting providers.
@@ -67,6 +69,13 @@ DOMAIN-SUFFIX,segment.io,PROXY
 DOMAIN-SUFFIX,segment.com,PROXY
 DOMAIN-SUFFIX,stripe.com,PROXY
 DOMAIN-SUFFIX,stripe.network,PROXY
+
+# Additional service resources use the selected proxy, with normal UDP handling.
+DOMAIN-SUFFIX,oaistatic.com,PROXY
+DOMAIN-SUFFIX,oaiusercontent.com,PROXY
+DOMAIN-SUFFIX,hf.co,PROXY
+DOMAIN-SUFFIX,groq.com,PROXY
+DOMAIN-SUFFIX,recaptcha.net,PROXY
 
 # Service ingress IP fallback; no forced DNS lookup for these rules.
 # Both IPv4 and IPv6 literals use Shadowrocket's IP-CIDR rule syntax.

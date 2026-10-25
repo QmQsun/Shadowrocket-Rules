@@ -25,6 +25,8 @@ MAX_BYTES = 8_000_000
 MIN_RULES, MAX_RULES = 50_000, 80_000
 POLICIES = {"PROXY", "DIRECT", "REJECT", "REJECT-NO-DROP"}
 DOMAIN_TYPES = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
+PROXY_ONLY_DOMAINS = {("DOMAIN-SUFFIX", host) for host in
+                      ("oaistatic.com", "oaiusercontent.com", "hf.co", "groq.com", "recaptcha.net")}
 SOURCE_TYPES = {"DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "IP-CIDR", "FINAL"}
 GENERAL_KEYS = {
     "udp-policy-not-supported-behaviour", "dns-server", "bypass-system",
@@ -68,6 +70,14 @@ def active(lines):
 def parse_rule(line):
     """Return (kind, target, policy); only accept this project's reviewed syntax."""
     if line.startswith("AND,"):
+        ip_match = re.fullmatch(
+            r"AND,\(\(PROTOCOL,UDP\),\(DST-PORT,443\),"
+            r"\(IP-CIDR,([^(),\s]+),no-resolve\)\),REJECT-NO-DROP",
+            line,
+        )
+        if ip_match:
+            parse_rule(f"IP-CIDR,{ip_match[1]},PROXY,no-resolve")
+            return "AND", ("IP-CIDR", ip_match[1].lower()), "REJECT-NO-DROP"
         match = re.fullmatch(
             r"AND,\(\(PROTOCOL,UDP\),\(DST-PORT,443\),"
             r"\((DOMAIN(?:-SUFFIX|-KEYWORD)?),([^(),\s]+)\)\),REJECT-NO-DROP",
@@ -123,8 +133,12 @@ def route(rules, host="", ip=None, protocol="TCP", port=443):
     address = ipaddress.ip_address(ip) if ip else None
     for kind, target, policy in rules:
         if kind == "AND":
-            if protocol == "UDP" and port == 443 and domain_matches(*target, host):
-                return policy
+            if protocol == "UDP" and port == 443:
+                if target[0] == "IP-CIDR":
+                    if address is not None and address in ipaddress.ip_network(target[1], strict=False):
+                        return policy
+                elif host and domain_matches(*target, host):
+                    return policy
         elif kind in DOMAIN_TYPES and host and domain_matches(kind, target, host):
             return policy
         elif kind == "IP-CIDR" and address is not None:
@@ -136,19 +150,22 @@ def route(rules, host="", ip=None, protocol="TCP", port=443):
 
 
 def validate_priority(custom, merged):
-    if not custom or len(custom) != 64 or len(set(custom)) != len(custom):
-        raise BuildError("Expected the reviewed 64 distinct custom rules")
+    if not custom or len(custom) != 71 or len(set(custom)) != len(custom):
+        raise BuildError("Expected the reviewed 71 distinct custom rules")
     proxy_domains = {(kind, target) for kind, target, policy in custom
                      if kind in DOMAIN_TYPES and policy == "PROXY"}
-    udp_domains = {target for kind, target, policy in custom if kind == "AND"}
-    if len(proxy_domains) != 31 or proxy_domains != udp_domains:
+    udp_domains = {target for kind, target, policy in custom
+                   if kind == "AND" and target[0] in DOMAIN_TYPES}
+    if (len(proxy_domains) != 36 or not PROXY_ONLY_DOMAINS <= proxy_domains
+            or proxy_domains - PROXY_ONLY_DOMAINS != udp_domains):
         raise BuildError("Custom domain/UDP coverage is incomplete")
     for kind, target in proxy_domains:
         host = "test-" + target + ".example" if kind == "DOMAIN-KEYWORD" else target
         for sample in [host] + (["sub." + host] if kind == "DOMAIN-SUFFIX" else []):
             if route(merged, host=sample) != "PROXY":
                 raise BuildError("Custom TCP route did not win")
-            if route(merged, host=sample, protocol="UDP") != "REJECT-NO-DROP":
+            udp_policy = "PROXY" if (kind, target) in PROXY_ONLY_DOMAINS else "REJECT-NO-DROP"
+            if route(merged, host=sample, protocol="UDP") != udp_policy:
                 raise BuildError("Custom QUIC route did not win")
     for host in ("ip.net.coffee", "api.segment.io", "segment.com"):
         if route(merged, host=host) != "PROXY":
@@ -156,9 +173,14 @@ def validate_priority(custom, merged):
     networks = {target for kind, target, policy in custom if kind == "IP-CIDR" and policy == "PROXY"}
     if networks != {"160.79.104.0/23", "2607:6bc0::/48"}:
         raise BuildError("Required ingress networks missing")
+    udp_networks = {target[1] for kind, target, policy in custom
+                    if kind == "AND" and target[0] == "IP-CIDR"}
+    if udp_networks != networks:
+        raise BuildError("Required ingress UDP coverage is incomplete")
     for ip in ("160.79.104.1", "160.79.105.254", "2607:6bc0::1"):
-        for protocol in ("TCP", "UDP"):
-            if route(merged, ip=ip, protocol=protocol) != "PROXY":
+        for protocol, port, expected in (("TCP", 443, "PROXY"), ("UDP", 443, "REJECT-NO-DROP"),
+                                         ("UDP", 3478, "PROXY")):
+            if route(merged, ip=ip, protocol=protocol, port=port) != expected:
                 raise BuildError("IP fallback did not win")
 
 
