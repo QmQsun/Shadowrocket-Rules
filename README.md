@@ -1,6 +1,8 @@
-# iOS Shadowrocket 广告过滤规则
+# 移动端广告过滤规则
 
 协助 iOS 上的 Shadowrocket 屏蔽广告，保留日常网站分流，并支持自定义规则与每周更新。配置不包含代理节点、账号或节点订阅信息；所有 `PROXY` 规则统一使用手机当前选中的代理。
+
+Android Clash Meta 版本提供独立的远程规则集合和单 `PROXY` 配置模板，详见 [安卓使用说明](Docs/Android.md)。安卓的节点订阅需保留在设备或私有文件中，不能把 iOS 的 `.conf` 链接直接作为安卓配置导入。
 
 ## 配置地址
 
@@ -15,7 +17,7 @@ https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_ios_adblock.
 ## 更新与维护
 
 - GitHub Actions 每周一 04:17（Asia/Shanghai，UTC+8）检查上游；实际触发可能延迟。
-- 在仓库 Actions 中选择 `Update iOS ad-blocking rules → Run workflow` 可手动更新。
+- 在仓库 Actions 中选择 `Update mobile ad-blocking rules → Run workflow` 可手动更新。
 - 修改 `Rules/Overrides.list`、`Config/Local.conf` 或构建相关文件后，推送到 `main` 也会触发更新。
 - 每次先解析上游提交 SHA，再下载该固定提交。`Build-info.json` 记录来源、输入及输出 SHA256 和规则数量。
 - 校验不通过时，工作流失败并保留远端已有配置。没有内容变化时不产生新提交。
@@ -32,6 +34,7 @@ git pull --ff-only
 ```powershell
 python Tests/run.py
 python Scripts/build.py
+python Scripts/build_android.py
 ```
 
 原始快照的离线构建：

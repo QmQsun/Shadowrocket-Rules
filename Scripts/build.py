@@ -270,8 +270,13 @@ def publish(output_dir, output, info):
     A sudden process/power loss between replacements is not a two-file transaction.
     Remote publication is a single Git commit after all steps succeed.
     """
-    output_dir.mkdir(parents=True, exist_ok=True)
     payloads = {OUTPUT: output, "Build-info.json": (json.dumps(info, indent=2) + "\n").encode()}
+    publish_files(output_dir, payloads)
+
+
+def publish_files(output_dir, payloads):
+    """Replace a validated group of files, restoring previous files on I/O failure."""
+    output_dir.mkdir(parents=True, exist_ok=True)
     old = {name: (output_dir / name).read_bytes() if (output_dir / name).exists() else None
            for name in payloads}
     staged, replaced = {}, []

@@ -1,0 +1,5 @@
+# Mobile service routing, applied after the shared priority rules and ad filtering.
+DOMAIN-SUFFIX,teamviewer.com,DIRECT
+DOMAIN-SUFFIX,teamviewer.cn,DIRECT
+DOMAIN-SUFFIX,dyngate.com,DIRECT
+DOMAIN-SUFFIX,ima.qq.com,DIRECT

@@ -1,4 +1,4 @@
-name: Update iOS ad-blocking rules
+name: Update mobile ad-blocking rules
 
 on:
   schedule:
@@ -37,11 +37,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python Scripts/build.py
+      - name: Build Android rule providers from validated inputs
+        run: python Scripts/build_android.py
       - name: Publish validated configuration
         shell: bash
         run: |
           set -euo pipefail
-          git add sr_ios_adblock.conf Build-info.json
+          git add sr_ios_adblock.conf Build-info.json Android/*.yaml Android/Build-info.json
           if git diff --cached --quiet; then
             echo 'No output changes.'
             exit 0

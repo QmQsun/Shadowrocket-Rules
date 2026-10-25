@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "upstream_commit": "cc14d9db68bf81aafccb26f99e8ae6badf31937f",
+  "source_config_sha256": "d364ccfb05c62b67f10183bbab282ccdb87846a0c28735dd742a39f0b1fe0f12",
+  "inputs": {
+    "services_sha256": "4e1f213c356ff3e8b31c6e4e4225385f89bc604d8fd0f35937c9f0255259405d",
+    "direct_sha256": "a60d9dfe1f1eaf2ed029c1f71fb3e1779e702bd74bbeaa2dfb694758c51691fe"
+  },
+  "providers": {
+    "Priority-reject": {
+      "rules": 33,
+      "policy": "REJECT",
+      "sha256": "5cb023d79a5231d1277c1c00b8572f2ebca3b5d7f5b361ee57c6116ed5ecce35"
+    },
+    "Priority-proxy": {
+      "rules": 38,
+      "policy": "PROXY",
+      "sha256": "d251a0340b2dc45f9fe0845cc109cc5e428011a6b987b1728be81efdc8b5490b"
+    },
+    "Ads": {
+      "rules": 57923,
+      "policy": "REJECT",
+      "sha256": "e616b831e6a7c64eac6102f96caf86bba77dcac7be36d6d47cf77ae4aedb7ba2"
+    },
+    "Services": {
+      "rules": 56,
+      "policy": "PROXY",
+      "sha256": "f3c607ffd7c4e4821b8d6b84614a75a59a6d7e8a8f8aef1b60b4db5b137910a7"
+    },
+    "Direct": {
+      "rules": 4,
+      "policy": "DIRECT",
+      "sha256": "6be755c7ee609ae3e5afaef6e106da3242c044257d3d7af0a83a3a42a4371ae9"
+    }
+  },
+  "profile_template_sha256": "728862fbedbced861e57f49beb661de077bd68f099a14fff8065ca2c9cdc0a92"
+}

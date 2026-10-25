@@ -1,0 +1,127 @@
+{
+  "mixed-port": 7890,
+  "allow-lan": false,
+  "mode": "rule",
+  "log-level": "warning",
+  "ipv6": false,
+  "profile": {
+    "store-selected": true
+  },
+  "dns": {
+    "enable": true,
+    "ipv6": false,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-filter": [
+      "*.lan",
+      "localhost.ptlogin2.qq.com"
+    ],
+    "default-nameserver": [
+      "223.5.5.5",
+      "119.29.29.29"
+    ],
+    "proxy-server-nameserver": [
+      "223.5.5.5",
+      "119.29.29.29"
+    ],
+    "nameserver": [
+      "https://8.8.8.8/dns-query#PROXY",
+      "https://1.1.1.1/dns-query#PROXY"
+    ],
+    "fallback": [],
+    "nameserver-policy": {
+      "example.invalid": [
+        "223.5.5.5",
+        "119.29.29.29"
+      ]
+    }
+  },
+  "proxy-providers": {
+    "PandaFan": {
+      "url": "https://example.invalid/subscription",
+      "interval": 86400,
+      "type": "http",
+      "path": "./Providers/PandaFan.yaml",
+      "proxy": "DIRECT",
+      "health-check": {
+        "enable": false
+      }
+    }
+  },
+  "proxy-groups": [
+    {
+      "name": "PROXY",
+      "type": "select",
+      "proxies": [
+        "REJECT"
+      ],
+      "use": [
+        "PandaFan"
+      ]
+    }
+  ],
+  "rule-providers": {
+    "Priority-reject": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Priority-reject.yaml",
+      "path": "./Rules/Priority-reject.yaml",
+      "interval": 86400,
+      "proxy": "PROXY"
+    },
+    "Priority-proxy": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Priority-proxy.yaml",
+      "path": "./Rules/Priority-proxy.yaml",
+      "interval": 86400,
+      "proxy": "PROXY"
+    },
+    "Ads": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Ads.yaml",
+      "path": "./Rules/Ads.yaml",
+      "interval": 86400,
+      "proxy": "PROXY"
+    },
+    "Services": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Services.yaml",
+      "path": "./Rules/Services.yaml",
+      "interval": 86400,
+      "proxy": "PROXY"
+    },
+    "Direct": {
+      "type": "http",
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Direct.yaml",
+      "path": "./Rules/Direct.yaml",
+      "interval": 86400,
+      "proxy": "PROXY"
+    }
+  },
+  "rules": [
+    "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
+    "IP-CIDR,10.0.0.0/8,DIRECT,no-resolve",
+    "IP-CIDR,172.16.0.0/12,DIRECT,no-resolve",
+    "IP-CIDR,192.168.0.0/16,DIRECT,no-resolve",
+    "IP-CIDR,169.254.0.0/16,DIRECT,no-resolve",
+    "IP-CIDR6,::1/128,DIRECT,no-resolve",
+    "IP-CIDR6,fc00::/7,DIRECT,no-resolve",
+    "IP-CIDR6,fe80::/10,DIRECT,no-resolve",
+    "RULE-SET,Priority-reject,REJECT",
+    "RULE-SET,Priority-proxy,PROXY",
+    "RULE-SET,Ads,REJECT",
+    "RULE-SET,Services,PROXY",
+    "RULE-SET,Direct,DIRECT",
+    "GEOIP,CN,DIRECT",
+    "MATCH,PROXY"
+  ]
+}
