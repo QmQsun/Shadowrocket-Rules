@@ -1,0 +1,10 @@
+{
+  "repository": "nthack/Shadowrocket-ADBlock-Rules-Easy",
+  "branch": "master",
+  "commit": "cc14d9db68bf81aafccb26f99e8ae6badf31937f",
+  "committed_at": "2026-10-25T13:01:28Z",
+  "file": "sr_banlist_ad.conf",
+  "sha256": "b8b5f2f87ad23fdfa564dba8c18971f7a5a47fc427a0a4ec5ffcb968e637925d",
+  "rule_count": 62653,
+  "license": "CC-BY-SA-4.0"
+}

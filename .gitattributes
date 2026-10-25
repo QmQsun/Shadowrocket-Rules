@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Preserve the original upstream snapshot byte-for-byte, including whitespace.
+Upstream/*.conf -text -whitespace

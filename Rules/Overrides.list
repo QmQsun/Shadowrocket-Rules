@@ -1,0 +1,75 @@
+# Local priority rules, applied before upstream ad/IP/domain rules.
+# Shadowrocket uses PROTOCOL,UDP inside logical rules, not Clash NETWORK,udp.
+# Targeted UDP/443 rejection only when these domain conditions match.
+# This does not block all UDP/STUN and does not prove WebRTC/DNS leak protection.
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.ai)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,api.anthropic.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,anthropic.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,anthropic-cdn.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claudeusercontent.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claudemcpcontent.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,http-intake.logs.us5.datadoghq.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,browser-intake-us5-datadoghq.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,ip.net.coffee)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,clau.de)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claudemcpclient.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,anthropic.auth0.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,anthropic-com.ghost.io)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,servd-anthropic-website.b-cdn.net)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,anthropic.com.cdn.cloudflare.net)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,statsigapi.net)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,intercom.io)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,intercomcdn.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,challenges.cloudflare.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,static.cloudflareinsights.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,cloudflare.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,usefathom.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-KEYWORD,datadoghq)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,statsig.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,sentry.io)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,api.segment.io)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,segment.io)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,segment.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.network)),REJECT-NO-DROP
+
+# Core, content, telemetry, payment, verification, support, and test-site routing.
+# Service-specific hosts remain narrow on shared hosting providers.
+DOMAIN-SUFFIX,claude.ai,PROXY
+DOMAIN-SUFFIX,claude.com,PROXY
+DOMAIN,api.anthropic.com,PROXY
+DOMAIN-SUFFIX,anthropic.com,PROXY
+DOMAIN-SUFFIX,anthropic-cdn.com,PROXY
+DOMAIN-SUFFIX,claudeusercontent.com,PROXY
+DOMAIN-SUFFIX,claudemcpcontent.com,PROXY
+DOMAIN,http-intake.logs.us5.datadoghq.com,PROXY
+DOMAIN,browser-intake-us5-datadoghq.com,PROXY
+DOMAIN-SUFFIX,ip.net.coffee,PROXY
+DOMAIN-SUFFIX,clau.de,PROXY
+DOMAIN-SUFFIX,claudemcpclient.com,PROXY
+DOMAIN,anthropic.auth0.com,PROXY
+DOMAIN,anthropic-com.ghost.io,PROXY
+DOMAIN,servd-anthropic-website.b-cdn.net,PROXY
+DOMAIN,anthropic.com.cdn.cloudflare.net,PROXY
+DOMAIN-SUFFIX,statsigapi.net,PROXY
+DOMAIN-SUFFIX,intercom.io,PROXY
+DOMAIN-SUFFIX,intercomcdn.com,PROXY
+DOMAIN,challenges.cloudflare.com,PROXY
+DOMAIN,static.cloudflareinsights.com,PROXY
+DOMAIN-SUFFIX,cloudflare.com,PROXY
+DOMAIN-SUFFIX,usefathom.com,PROXY
+DOMAIN-KEYWORD,datadoghq,PROXY
+DOMAIN-SUFFIX,statsig.com,PROXY
+DOMAIN-SUFFIX,sentry.io,PROXY
+DOMAIN-SUFFIX,api.segment.io,PROXY
+DOMAIN-SUFFIX,segment.io,PROXY
+DOMAIN-SUFFIX,segment.com,PROXY
+DOMAIN-SUFFIX,stripe.com,PROXY
+DOMAIN-SUFFIX,stripe.network,PROXY
+
+# Service ingress IP fallback; no forced DNS lookup for these rules.
+# Both IPv4 and IPv6 literals use Shadowrocket's IP-CIDR rule syntax.
+# Adding an IPv6 rule does not change the app's IPv6 setting.
+IP-CIDR,160.79.104.0/23,PROXY,no-resolve
+IP-CIDR,2607:6bc0::/48,PROXY,no-resolve
