@@ -5,7 +5,7 @@
 ## 配置地址
 
 ```text
-https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_banlist_ad.conf
+https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_ios_adblock.conf
 ```
 
 在 Shadowrocket 中打开「配置」，点右上角「+」，粘贴此地址下载，然后选择「使用配置」。全局路由选择「配置」。先导出原配置留作备份，确认新配置可以正常使用后再切换日常使用。
@@ -44,7 +44,7 @@ python Scripts/build.py --upstream-file Upstream/Original-20261026.conf --upstre
 
 | 文件 | 用途 |
 |---|---|
-| `sr_banlist_ad.conf` | 手机下载的完整配置 |
+| `sr_ios_adblock.conf` | 手机下载的完整配置 |
 | `Config/Local.conf` | 固定通用设置、更新地址和 URL Rewrite |
 | `Rules/Overrides.list` | 优先于上游的本地规则 |
 | `Scripts/build.py` | 固定版本下载、合并及验证 |

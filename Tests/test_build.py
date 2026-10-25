@@ -70,7 +70,7 @@ class BuildTests(unittest.TestCase):
         local = b.sections(self.local, ["General", "URL Rewrite"])
         for section in local:
             self.assertEqual(b.active(result[section]), b.active(local[section]))
-        self.assertIn("update-url = https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_banlist_ad.conf",
+        self.assertIn("update-url = https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_ios_adblock.conf",
                       b.active(result["General"]))
 
     def test_only_identical_selectors_removed_and_order_preserved(self):

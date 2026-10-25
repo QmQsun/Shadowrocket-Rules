@@ -10,7 +10,7 @@
     "bytes": 2466941
   },
   "inputs": {
-    "local_sha256": "9910785f0a3739116b0648a6d24a409fd742da9ca1c44c7c172063256c0bcc6e",
+    "local_sha256": "f4a04e35ae5faf29c808d0f068278f8c97e7728971c8ee25a88b9bb5f9f9111c",
     "custom_sha256": "3787611b6a09887fc7f8f687a806c0082fe196e148efca6a0755f59286ebb93f"
   },
   "rules": {
@@ -20,9 +20,9 @@
     "merged": 62712
   },
   "output": {
-    "filename": "sr_banlist_ad.conf",
-    "sha256": "51a5eea091e863a4af7fe0594165d7e4df9ea85f355801bfcf04ebebb2fae893",
-    "bytes": 2470335
+    "filename": "sr_ios_adblock.conf",
+    "sha256": "394f18f3a6d5014dc5bc7fcb7ff331536cd3cbd37a6cca9c01663563c87f1ab2",
+    "bytes": 2470336
   },
   "validation": "bounded static checks only; iOS verification required"
 }
