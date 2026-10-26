@@ -32,11 +32,14 @@ class AndroidTests(unittest.TestCase):
             self.assertNotIn("FINAL", line)
             self.assertNotIn(",PROXY", line)
 
-    def test_template_has_one_manual_proxy_and_preserves_rule_order(self):
+    def test_template_defaults_to_global_through_manual_proxy_and_keeps_rules(self):
         config = json.loads(self.files["Profile-template.yaml"])
-        self.assertEqual(len(config["proxy-groups"]), 1)
+        self.assertEqual(config["mode"], "global")
+        self.assertEqual(len(config["proxy-groups"]), 2)
         self.assertEqual(config["proxy-groups"][0],
                          {"name": "PROXY", "type": "select", "proxies": ["REJECT"], "use": ["PandaFan"]})
+        self.assertEqual(config["proxy-groups"][1],
+                         {"name": "GLOBAL", "type": "select", "proxies": ["PROXY"]})
         rules = config["rules"]
         self.assertLess(rules.index("RULE-SET,Priority-proxy,PROXY"), rules.index("RULE-SET,Ads,REJECT"))
         self.assertLess(rules.index("RULE-SET,Ads,REJECT"), rules.index("RULE-SET,Services,PROXY"))

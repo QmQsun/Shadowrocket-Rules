@@ -1,7 +1,7 @@
 {
   "mixed-port": 7890,
   "allow-lan": false,
-  "mode": "rule",
+  "mode": "global",
   "log-level": "warning",
   "ipv6": false,
   "profile": {
@@ -57,6 +57,13 @@
       ],
       "use": [
         "PandaFan"
+      ]
+    },
+    {
+      "name": "GLOBAL",
+      "type": "select",
+      "proxies": [
+        "PROXY"
       ]
     }
   ],

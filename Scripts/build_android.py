@@ -50,7 +50,7 @@ def selector(line):
 
 
 def profile(provider):
-    """One manually selected proxy group; subscription details remain caller-owned."""
+    """Default to global mode through the manually selected PROXY group."""
     provider = copy.deepcopy(provider)
     provider.update({"type": "http", "path": "./Providers/PandaFan.yaml", "proxy": "DIRECT"})
     provider.setdefault("interval", 86400)
@@ -61,7 +61,7 @@ def profile(provider):
     rules = LAN_RULES + [f"RULE-SET,{name},{policy}" for name, policy in FILES.items()]
     rules += ["GEOIP,CN,DIRECT", "MATCH,PROXY"]
     return {
-        "mixed-port": 7890, "allow-lan": False, "mode": "rule", "log-level": "warning",
+        "mixed-port": 7890, "allow-lan": False, "mode": "global", "log-level": "warning",
         "ipv6": False, "profile": {"store-selected": True},
         "dns": {
             "enable": True, "ipv6": False, "enhanced-mode": "fake-ip",
@@ -74,7 +74,10 @@ def profile(provider):
             "nameserver-policy": {host: ["223.5.5.5", "119.29.29.29"]},
         },
         "proxy-providers": {"PandaFan": provider},
-        "proxy-groups": [{"name": "PROXY", "type": "select", "proxies": ["REJECT"], "use": ["PandaFan"]}],
+        "proxy-groups": [
+            {"name": "PROXY", "type": "select", "proxies": ["REJECT"], "use": ["PandaFan"]},
+            {"name": "GLOBAL", "type": "select", "proxies": ["PROXY"]},
+        ],
         "rule-providers": {
             name: {"type": "http", "behavior": "classical", "format": "yaml",
                    "url": REMOTE + name + ".yaml", "path": "./Rules/" + name + ".yaml",
