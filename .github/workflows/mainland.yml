@@ -1,0 +1,48 @@
+name: Update mainland routing profile
+
+on:
+  schedule:
+    # Monday 04:27 Asia/Shanghai (UTC+8); GitHub may delay scheduled runs.
+    - cron: '27 20 * * 0'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Mainland/**'
+      - 'Scripts/build.py'
+      - '.github/workflows/mainland.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  # Share the existing publication lock without changing the other workflow.
+  group: shadowrocket-weekly-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Test restricted routes and failure handling
+        run: python -m unittest discover -s Mainland -p 'test_*.py' -v
+      - name: Build validated profile
+        run: python Mainland/build.py
+      - name: Publish only mainland outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add sr_mainland.conf Mainland/Build-info.json
+          if git diff --cached --quiet; then
+            echo 'No output changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update mainland routing profile'
+          git push origin HEAD:main

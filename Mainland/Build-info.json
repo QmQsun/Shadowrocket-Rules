@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "Reviewed selectors from user-supplied desktop policy, extracted 2026-10-30",
+  "inputs": {
+    "general_sha256": "7512f5e620bb47bc06c704becec62cfca10665e5a0b5919e68618dcea7ad9cf1",
+    "deny_sha256": "ba04e7280d89f0fc6b5c3f1859ae9fecf85666291f659dfd9402c3d57260a9da"
+  },
+  "rules": {
+    "domain_or_keyword": 29,
+    "ip_networks": 2,
+    "restricted": 31,
+    "total": 32
+  },
+  "output": {
+    "filename": "sr_mainland.conf",
+    "sha256": "14f63ce6abb0fc5587f815f98b96276bd774550ba2301d969e0bbba9af8cb84d",
+    "bytes": 2000
+  },
+  "required_routing_mode": "config",
+  "proxy_mode_protection": false,
+  "updating": "Weekly validation and rebuild of curated inputs; no automatic discovery of new destinations",
+  "validation": "Static checks only; device import and runtime routing require verification"
+}
