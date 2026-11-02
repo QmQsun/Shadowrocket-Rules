@@ -1,0 +1,96 @@
+{
+  "review_date": "2026-11-02",
+  "reason": "Scheduled build rejected a greater-than-10-percent upstream count change; reviewed this exact source revision before advancing the baseline.",
+  "failed_run": "https://github.com/QmQsun/Shadowrocket-Rules/actions/runs/41363099023",
+  "upstream_run": "https://github.com/nthack/Shadowrocket-ADBlock-Rules-Easy/actions/runs/41346199534",
+  "previous": {
+    "commit": "675eb272f69069ac8f2b32159cd499fdd1064219",
+    "bytes": 2470414,
+    "sha256": "187eb694c6a61571acf4de5bd2ca42668408f616a5c90762f14302a11c1dbcd4",
+    "count": 62738,
+    "unique_rules": 62727,
+    "policies": {
+      "REJECT": 58010,
+      "PROXY": 4402,
+      "DIRECT": 326
+    },
+    "types": {
+      "DOMAIN-SUFFIX": 62589,
+      "IP-CIDR": 142,
+      "DOMAIN-KEYWORD": 6,
+      "FINAL": 1
+    }
+  },
+  "accepted": {
+    "commit": "a31d2702b83033bdff0e4f0524e83f7f07b50910",
+    "bytes": 2098217,
+    "sha256": "0d5743591be52f239d420d4a13ad8e5ee312ebc84d83ae2dfe1857303f871d04",
+    "count": 53633,
+    "unique_rules": 53622,
+    "policies": {
+      "REJECT": 48897,
+      "PROXY": 4410,
+      "DIRECT": 326
+    },
+    "types": {
+      "DOMAIN-SUFFIX": 53484,
+      "IP-CIDR": 142,
+      "DOMAIN-KEYWORD": 6,
+      "FINAL": 1
+    }
+  },
+  "changes": {
+    "removed_reject_rules": 11612,
+    "added_reject_rules": 2499,
+    "added_proxy_rules": 8,
+    "net_rule_change": -9105,
+    "net_percent_change": -14.5127
+  },
+  "checks": {
+    "upstream_ad_feeds_downloaded_successfully": true,
+    "reject_rules_reconcile_exactly_with_upstream_ad_and_manual_lists": true,
+    "direct_rules_unchanged": true,
+    "ip_rules_unchanged": true,
+    "keyword_rules_unchanged": true,
+    "existing_proxy_rules_retained_in_order": true,
+    "upstream_generator_and_templates_unchanged": true,
+    "local_settings_and_priority_rules_unchanged": true,
+    "mainland_profile_unchanged": true
+  },
+  "added_proxy_selectors": [
+    [
+      "DOMAIN-SUFFIX",
+      "anthropic.auth0.com"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "api.themoviedb.org"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "bsky.chat"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "claude.app"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "claudemcpcontent.com"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "claudeusercontent.com"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "torrentleech.org"
+    ],
+    [
+      "DOMAIN-SUFFIX",
+      "youversionapi.com"
+    ]
+  ],
+  "scope": "Advance the reviewed iOS/Android generated artifacts only. The 10 percent guard and absolute count bounds remain unchanged. No permanent source bypass is installed.",
+  "limits": "Reviewed source integrity, reconciliation and configuration invariants; not an endorsement or live test of every added or removed domain."
+}
