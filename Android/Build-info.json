@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "upstream_commit": "a31d2702b83033bdff0e4f0524e83f7f07b50910",
-  "source_config_sha256": "c1f1cda1da6ec9afa55399ef9d5c73c33c040a76a245b3acb6998de1f99cf9d4",
+  "upstream_commit": "24b68a123ac4c25239c60370cebd4b90afd5791c",
+  "source_config_sha256": "762cd6270d71b5ba9a5fb276f01b3fbd92b569478a2f8594268fa124e65b1dbb",
   "inputs": {
     "services_sha256": "4e1f213c356ff3e8b31c6e4e4225385f89bc604d8fd0f35937c9f0255259405d",
     "direct_sha256": "a60d9dfe1f1eaf2ed029c1f71fb3e1779e702bd74bbeaa2dfb694758c51691fe"
@@ -18,9 +18,9 @@
       "sha256": "d251a0340b2dc45f9fe0845cc109cc5e428011a6b987b1728be81efdc8b5490b"
     },
     "Ads": {
-      "rules": 48895,
+      "rules": 50960,
       "policy": "REJECT",
-      "sha256": "e365b3069571132ae4d110e31134e1fb254f792ee2f4b89579b6fdb59a6b8284"
+      "sha256": "4c78a79d7f16b0c19d0d0a812d17c7f719b6299493a8afc6d06a31cce5aba32c"
     },
     "Services": {
       "rules": 56,
