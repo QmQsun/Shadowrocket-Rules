@@ -10,14 +10,20 @@ if __package__:
 else:
     import build as base
 
+EXACT_SERVICE_HOSTS = (
+    "featuregates.org", "api.statsigcdn.com", "featureassets.org",
+    "assetsconfigcdn.org", "prodregistryv2.org", "beyondwickedmapping.org",
+)
 EXPECTED_RULES = [
     "AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),REJECT-NO-DROP",
     "AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,153.61.224.0/22,no-resolve)),REJECT-NO-DROP",
     "AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.app)),REJECT-NO-DROP",
     "AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,cloudflare-cn.com)),REJECT-NO-DROP",
+    *[f"AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,{host})),REJECT-NO-DROP" for host in EXACT_SERVICE_HOSTS],
     "AND,((PROTOCOL,TCP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),PROXY",
     "DOMAIN-SUFFIX,claude.app,PROXY",
     "DOMAIN-SUFFIX,cloudflare-cn.com,PROXY",
+    *[f"DOMAIN,{host},PROXY" for host in EXACT_SERVICE_HOSTS],
     "IP-CIDR,153.61.224.0/22,PROXY,no-resolve",
 ]
 
@@ -27,7 +33,7 @@ def build(data, info, extra_text):
         raise base.BuildError("iOS source checksum mismatch")
     lines = base.active(extra_text.splitlines())
     if lines != EXPECTED_RULES:
-        raise base.BuildError("iOS-only rules differ from the reviewed eight-rule scope")
+        raise base.BuildError(f"iOS-only rules differ from the reviewed {len(EXPECTED_RULES)}-rule scope")
     extra_hash = base.sha256(extra_text.encode())
     if "ios_only" in info:
         if info["ios_only"]["sha256"] != extra_hash:
@@ -51,6 +57,15 @@ def build(data, info, extra_text):
             expected = "REJECT-NO-DROP" if protocol == "UDP" else "PROXY"
             if base.route(merged, host=host, protocol=protocol) != expected:
                 raise base.BuildError("iOS suffix route did not win")
+        for host in EXACT_SERVICE_HOSTS:
+            expected = "REJECT-NO-DROP" if protocol == "UDP" else "PROXY"
+            if base.route(merged, host=host, protocol=protocol) != expected:
+                raise base.BuildError("iOS exact service route did not win")
+            if base.route(merged, host=host, protocol=protocol, port=3478) != "PROXY":
+                raise base.BuildError("iOS exact service non-443 route changed")
+            for unrelated in ("sub." + host, "not" + host, host + ".example"):
+                if base.route(merged, host=unrelated, protocol=protocol) != base.route(shared, host=unrelated, protocol=protocol):
+                    raise base.BuildError("iOS exact service rule expanded its hostname scope")
         for address in ("153.61.224.0", "153.61.227.255"):
             for port in (53, 80, 443, 853, 3478):
                 expected = "REJECT-NO-DROP" if protocol == "UDP" and port == 443 else "PROXY"

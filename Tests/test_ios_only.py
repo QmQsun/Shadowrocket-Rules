@@ -61,8 +61,21 @@ class IOSOnlyTests(unittest.TestCase):
                 self.assertEqual(base.route(self.after_rules, ip=address, protocol=protocol),
                                  base.route(self.before_rules, ip=address, protocol=protocol))
 
+    def test_v20_exact_service_hosts_use_proxy_without_expanding_to_subdomains(self):
+        for host in ("featuregates.org", "api.statsigcdn.com", "featureassets.org",
+                     "assetsconfigcdn.org", "prodregistryv2.org", "beyondwickedmapping.org"):
+            with self.subTest(host=host):
+                for name in (host, host.upper() + "."):
+                    self.assertEqual(base.route(self.after_rules, host=name), "PROXY")
+                    self.assertEqual(base.route(self.after_rules, host=name, protocol="UDP"), "REJECT-NO-DROP")
+                    self.assertEqual(base.route(self.after_rules, host=name, protocol="UDP", port=3478), "PROXY")
+                for name in ("sub." + host, "not" + host, host + ".example"):
+                    for protocol in ("TCP", "UDP"):
+                        self.assertEqual(base.route(self.after_rules, host=name, protocol=protocol),
+                                         base.route(self.before_rules, host=name, protocol=protocol))
+
     def test_shared_rules_dns_and_rewrite_are_unchanged(self):
-        self.assertEqual(self.after_rules[8:], self.before_rules)
+        self.assertEqual(self.after_rules[20:], self.before_rules)
         for section in ("General", "URL Rewrite"):
             self.assertEqual(self.before_sections[section], self.after_sections[section])
         self.assertEqual(self.info["inputs"], self.shared_info["inputs"])
@@ -70,8 +83,8 @@ class IOSOnlyTests(unittest.TestCase):
         self.assertEqual(self.info["shared_output"], self.shared_info["output"])
         self.assertEqual(self.info["shared_rules"], self.shared_info["rules"])
         self.assertEqual(self.info["output"]["sha256"], base.sha256(self.output))
-        self.assertEqual(self.info["rules"]["custom"], 79)
-        self.assertEqual(self.info["rules"]["ios_only"], 8)
+        self.assertEqual(self.info["rules"]["custom"], 91)
+        self.assertEqual(self.info["rules"]["ios_only"], 20)
 
     def test_android_payloads_do_not_inherit_ios_additions(self):
         services = (base.ROOT / "Rules/Android-services.list").read_text(encoding="utf-8")
@@ -86,7 +99,8 @@ class IOSOnlyTests(unittest.TestCase):
         self.assertEqual(ios.build(self.output, self.info, self.extra), (self.output, self.info))
         for extra in ("", self.extra.replace("DST-PORT,443", "DST-PORT,53", 1),
                       self.extra.replace("1.1.1.1/32", "1.1.1.0/24", 1),
-                      self.extra.replace("153.61.224.0/22", "153.61.224.0/21", 1)):
+                      self.extra.replace("153.61.224.0/22", "153.61.224.0/21", 1),
+                      self.extra.replace("DOMAIN,featuregates.org", "DOMAIN-SUFFIX,featuregates.org", 1)):
             with self.subTest(), self.assertRaises(base.BuildError):
                 ios.build(self.shared, self.shared_info, extra)
         with self.assertRaises(base.BuildError):
