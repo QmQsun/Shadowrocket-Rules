@@ -14,7 +14,8 @@ class MainlandTests(unittest.TestCase):
         cls.general = (m.ROOT / "Mainland/General.conf").read_text(encoding="utf-8")
         cls.deny = (m.ROOT / "Mainland/Deny.list").read_text(encoding="utf-8")
         cls.output, cls.info = m.build(cls.general, cls.deny)
-        cls.rules = [common.parse_rule(line) for line in common.active(cls.deny.splitlines())]
+        output_rules = common.active(common.sections(cls.output.decode(), ["General", "Rule"])["Rule"])
+        cls.rules = [common.parse_rule(line) for line in output_rules[:-1]]
         cls.rules.append(("FINAL", "", "PROXY"))
 
     def test_domains_and_both_transports_rejected(self):
@@ -27,7 +28,7 @@ class MainlandTests(unittest.TestCase):
 
     def test_network_boundaries_reject_and_outside_uses_proxy(self):
         inside = ("160.79.104.0", "160.79.105.255", "2607:6bc0::", "2607:6bc0:0:ffff:ffff:ffff:ffff:ffff")
-        outside = ("160.79.103.255", "160.79.106.0", "2607:6bc0:1::", "1.1.1.1")
+        outside = ("160.79.103.255", "160.79.106.0", "2607:6bc0:1::", "1.1.1.2")
         for address in inside + outside:
             for protocol in ("TCP", "UDP"):
                 with self.subTest(address=address, protocol=protocol):
@@ -40,13 +41,30 @@ class MainlandTests(unittest.TestCase):
         self.assertTrue(common.domain_matches("DOMAIN-SUFFIX", "claude.ai", "CHAT.CLAUDE.AI."))
         self.assertFalse(common.domain_matches("DOMAIN", "anthropic.auth0.com", "other.auth0.com"))
 
-    def test_profile_has_one_proxy_final_and_no_inherited_allow_rules(self):
+    def test_https_transport_scope_preserves_dns_and_other_ports(self):
+        for protocol in ("TCP", "UDP"):
+            for port in (53, 80, 443, 853, 3478):
+                with self.subTest(protocol=protocol, port=port):
+                    expected = "REJECT-NO-DROP" if protocol == "UDP" and port == 443 else "PROXY"
+                    self.assertEqual(common.route(self.rules, ip="1.1.1.1", protocol=protocol, port=port), expected)
+            for address in ("1.1.1.0", "1.1.1.2", "1.0.0.1", "2606:4700:4700::1111"):
+                self.assertEqual(common.route(self.rules, ip=address, protocol=protocol), "PROXY")
+
+    def test_restrictions_win_over_https_proxy_and_match_domain_boundaries(self):
+        for host in ("cloudflare-cn.com", "sub.cloudflare-cn.com", "SUB.CLOUDFLARE-CN.COM.", "claude.ai"):
+            for protocol in ("TCP", "UDP"):
+                self.assertEqual(common.route(self.rules, host=host, ip="1.1.1.1", protocol=protocol), "REJECT")
+        for host in ("notcloudflare-cn.com", "cloudflare-cn.com.example.org"):
+            self.assertEqual(common.route(self.rules, host=host), "PROXY")
+
+    def test_profile_keeps_restrictions_before_narrow_transport_rules(self):
         sections = common.sections(self.output.decode(), ["General", "Rule"])
         rules = common.active(sections["Rule"])
-        self.assertEqual(len(rules), 32)
+        self.assertEqual(len(rules), 35)
         self.assertEqual(rules[-1], "FINAL,PROXY")
         self.assertEqual(sum(x.startswith("FINAL,") for x in rules), 1)
-        self.assertTrue(all(common.parse_rule(x)[2] == "REJECT" for x in rules[:-1]))
+        self.assertTrue(all(common.parse_rule(x)[2] == "REJECT" for x in rules[:32]))
+        self.assertEqual(rules[32:-1], m.TRANSPORT_RULES)
         self.assertIn("update-url = " + m.UPDATE_URL, sections["General"])
         self.assertEqual(self.info["required_routing_mode"], "config")
         self.assertIs(self.info["proxy_mode_protection"], False)

@@ -21,6 +21,7 @@ DOMAIN-SUFFIX,intercomcdn.com,REJECT
 DOMAIN,challenges.cloudflare.com,REJECT
 DOMAIN,static.cloudflareinsights.com,REJECT
 DOMAIN-SUFFIX,cloudflare.com,REJECT
+DOMAIN-SUFFIX,cloudflare-cn.com,REJECT
 DOMAIN-SUFFIX,usefathom.com,REJECT
 DOMAIN-KEYWORD,datadoghq,REJECT
 DOMAIN-SUFFIX,statsig.com,REJECT

@@ -1,20 +1,22 @@
 {
   "schema_version": 1,
-  "source": "Reviewed selectors from user-supplied desktop policy, extracted 2026-10-30",
+  "source": "Reviewed desktop restrictions extracted 2026-10-30, with supplemental domain and HTTPS rules added 2026-11-09",
   "inputs": {
     "general_sha256": "7512f5e620bb47bc06c704becec62cfca10665e5a0b5919e68618dcea7ad9cf1",
-    "deny_sha256": "ba04e7280d89f0fc6b5c3f1859ae9fecf85666291f659dfd9402c3d57260a9da"
+    "deny_sha256": "e636334c69fae0a2295deae2b5c1d79f757cf998108941059216e603bdc63111",
+    "transport_sha256": "25fd25c78ba0f068e697b9c36e534c88354be52507cf9862f94734d806dd129a"
   },
   "rules": {
-    "domain_or_keyword": 29,
+    "domain_or_keyword": 30,
     "ip_networks": 2,
-    "restricted": 31,
-    "total": 32
+    "restricted": 32,
+    "transport": 2,
+    "total": 35
   },
   "output": {
     "filename": "sr_mainland.conf",
-    "sha256": "14f63ce6abb0fc5587f815f98b96276bd774550ba2301d969e0bbba9af8cb84d",
-    "bytes": 2000
+    "sha256": "69bf18b73f0af5e99b5a2544ea31d8bb8a73ab39123374df1b11379c4ec0cb87",
+    "bytes": 2254
   },
   "required_routing_mode": "config",
   "proxy_mode_protection": false,

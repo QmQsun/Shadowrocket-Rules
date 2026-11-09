@@ -13,6 +13,10 @@ from Scripts import build as common
 OUTPUT = "sr_mainland.conf"
 UPDATE_URL = "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/" + OUTPUT
 NETWORKS = {"160.79.104.0/23", "2607:6bc0::/48"}
+TRANSPORT_RULES = [
+    "AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),REJECT-NO-DROP",
+    "AND,((PROTOCOL,TCP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),PROXY",
+]
 
 
 def build(general_text, deny_text):
@@ -27,17 +31,20 @@ def build(general_text, deny_text):
         raise common.BuildError("Update URL or UDP fallback changed")
     lines = common.active(deny_text.splitlines())
     rules = [common.parse_rule(line) for line in lines]
-    if len(rules) != 31 or len(set(rules)) != 31:
-        raise common.BuildError("Expected 31 distinct reviewed restrictions")
+    if len(rules) != 32 or len(set(rules)) != 32:
+        raise common.BuildError("Expected 32 distinct reviewed restrictions")
     domains = [rule for rule in rules if rule[0] in common.DOMAIN_TYPES]
     networks = {target for kind, target, _ in rules if kind == "IP-CIDR"}
-    if len(domains) != 29 or networks != NETWORKS:
+    if len(domains) != 30 or networks != NETWORKS:
         raise common.BuildError("Restriction coverage changed; review required")
     if any(policy != "REJECT" for _, _, policy in rules):
         raise common.BuildError("All destination restrictions must reject")
     if any(not line.endswith(",no-resolve") for line in lines if line.startswith("IP-CIDR,")):
         raise common.BuildError("IP rules must retain no-resolve")
-    effective = rules + [("FINAL", "", "PROXY")]
+    if ("DOMAIN-SUFFIX", "cloudflare-cn.com", "REJECT") not in rules:
+        raise common.BuildError("Required supplemental domain restriction missing")
+    transport = [common.parse_rule(line) for line in TRANSPORT_RULES]
+    effective = rules + transport + [("FINAL", "", "PROXY")]
     for kind, target, _ in domains:
         sample = f"test-{target}.invalid" if kind == "DOMAIN-KEYWORD" else target
         hosts = [sample] + (["sub." + sample] if kind == "DOMAIN-SUFFIX" else [])
@@ -55,6 +62,11 @@ def build(general_text, deny_text):
     for host in ("example.com", "baidu.com", "notclaude.ai", "claude.ai.example.org"):
         if common.route(effective, host=host) != "PROXY":
             raise common.BuildError("Unrelated traffic must reach the selected proxy")
+    for protocol in ("TCP", "UDP"):
+        for port in (53, 80, 443, 853, 3478):
+            expected = "REJECT-NO-DROP" if protocol == "UDP" and port == 443 else "PROXY"
+            if common.route(effective, ip="1.1.1.1", protocol=protocol, port=port) != expected:
+                raise common.BuildError("HTTPS transport scope changed")
     output = (
         "# Mainland routing profile. CONFIG MODE ONLY.\n"
         "# Select the intended mainland node and use Global Routing > Config.\n"
@@ -62,14 +74,17 @@ def build(general_text, deny_text):
         "# Shared destinations in the deny list can affect unrelated websites.\n"
         "# No account, subscription, node or interception certificate is included.\n\n"
         + general_text.strip() + "\n\n[Rule]\n"
-        + "\n".join(lines) + "\nFINAL,PROXY\n"
+        + "\n".join(lines)
+        + "\n\n# Narrow transport rules after destination restrictions.\n"
+        + "\n".join(TRANSPORT_RULES) + "\nFINAL,PROXY\n"
     ).encode("utf-8")
     info = {
         "schema_version": 1,
-        "source": "Reviewed selectors from user-supplied desktop policy, extracted 2026-10-30",
+        "source": "Reviewed desktop restrictions extracted 2026-10-30, with supplemental domain and HTTPS rules added 2026-11-09",
         "inputs": {"general_sha256": common.sha256(general_text.encode()),
-                   "deny_sha256": common.sha256(deny_text.encode())},
-        "rules": {"domain_or_keyword": 29, "ip_networks": 2, "restricted": 31, "total": 32},
+                   "deny_sha256": common.sha256(deny_text.encode()),
+                   "transport_sha256": common.sha256("\n".join(TRANSPORT_RULES).encode())},
+        "rules": {"domain_or_keyword": 30, "ip_networks": 2, "restricted": 32, "transport": 2, "total": 35},
         "output": {"filename": OUTPUT, "sha256": common.sha256(output), "bytes": len(output)},
         "required_routing_mode": "config",
         "proxy_mode_protection": False,
