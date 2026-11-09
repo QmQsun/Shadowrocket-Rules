@@ -60,7 +60,7 @@ python Scripts/build.py --upstream-file Upstream/Original-20261026.conf --upstre
 
 通用设置和 URL Rewrite 只从本地配置读取，周更不采用上游的对应设置。本地规则排在上游前面；只删除与本地规则类型、目标完全相同的上游条目，其余保留原顺序。`FINAL,DIRECT` 必须唯一且位于规则末尾。
 
-构建顺序为共享基础配置、安卓导出、iOS 专用补充。iOS 专用层将 `1.1.1.1` 的 TCP 443 交给 `PROXY`，拒绝其 UDP 443，并将 `cloudflare-cn.com` 及子域名交给 `PROXY`；不会把 `1.1.1.1` 的其他端口一并改成代理。`Build-info.json` 的 `shared_output` 保留安卓导出所用基础配置的校验信息，`output` 对应最终 iOS 文件。
+构建顺序为共享基础配置、安卓导出、iOS 专用补充。iOS 专用层将 `1.1.1.1` 的 TCP 443 交给 `PROXY`、拒绝其 UDP 443；该地址的其他端口保持原规则。另将已审阅的 `153.61.224.0/22` 接入网段及补充服务域名交给 `PROXY`，匹配这些目标的 UDP 443 使用 `REJECT-NO-DROP`。具体选择器见 `Rules/iOS-only.list`。这些补充仅进入日常 iOS 配置，不加入安卓或大陆版。`Build-info.json` 的 `shared_output` 保留安卓导出所用基础配置的校验信息，`output` 对应最终 iOS 文件。
 
 上游结构、规则类型、策略或数量出现异常会中止构建。当前数量范围为 50,000–80,000，相比上次构建变化超过 10% 也需要人工审阅，不能直接放宽验证绕过失败。
 

@@ -15,15 +15,15 @@
   },
   "rules": {
     "upstream": 55699,
-    "custom": 74,
+    "custom": 79,
     "removed": 7,
-    "merged": 55766,
-    "ios_only": 3
+    "merged": 55771,
+    "ios_only": 8
   },
   "output": {
     "filename": "sr_ios_adblock.conf",
-    "sha256": "0e8cdfb9acf91778db1d948b578c382a3c0d2df0fecbe3866f27c8b37cf7d7d3",
-    "bytes": 2185977
+    "sha256": "56669d7909841ae07d6797b055ee38e2e93991a80e0cdbdb848401fd6258a58c",
+    "bytes": 2186300
   },
   "validation": "bounded static checks only; iOS verification required",
   "shared_output": {
@@ -39,7 +39,7 @@
   },
   "ios_only": {
     "source": "Rules/iOS-only.list",
-    "sha256": "915f5636d7e4a07f7c42f573d8ac77b59a377e60538cbb17fbfc1e676d7534b8",
-    "rules": 3
+    "sha256": "4dad39a7a77c2949c550492606c98efa11a34e08911338fc9122392e1ae55126",
+    "rules": 8
   }
 }

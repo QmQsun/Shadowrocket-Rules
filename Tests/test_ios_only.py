@@ -40,14 +40,29 @@ class IOSOnlyTests(unittest.TestCase):
                                  base.route(self.before_rules, ip=address, protocol=protocol))
 
     def test_suffix_includes_subdomains_without_matching_lookalikes(self):
-        for host in ("cloudflare-cn.com", "sub.cloudflare-cn.com", "SUB.CLOUDFLARE-CN.COM."):
+        for host in ("cloudflare-cn.com", "sub.cloudflare-cn.com", "SUB.CLOUDFLARE-CN.COM.",
+                     "claude.app", "sub.claude.app", "SUB.CLAUDE.APP."):
             for protocol in ("TCP", "UDP"):
-                self.assertEqual(base.route(self.after_rules, host=host, protocol=protocol), "PROXY")
-        for host in ("notcloudflare-cn.com", "cloudflare-cn.com.example.org"):
+                expected = "REJECT-NO-DROP" if protocol == "UDP" else "PROXY"
+                self.assertEqual(base.route(self.after_rules, host=host, protocol=protocol), expected)
+                self.assertEqual(base.route(self.after_rules, host=host, protocol=protocol, port=3478), "PROXY")
+        for host in ("notcloudflare-cn.com", "cloudflare-cn.com.example.org", "notclaude.app", "claude.app.example.org"):
             self.assertEqual(base.route(self.after_rules, host=host), base.route(self.before_rules, host=host))
 
+    def test_v19_network_boundaries_and_transport_scope(self):
+        for address in ("153.61.224.0", "153.61.224.1", "153.61.225.255", "153.61.226.1", "153.61.227.255"):
+            for protocol in ("TCP", "UDP"):
+                for port in (53, 80, 443, 853, 3478):
+                    with self.subTest(address=address, protocol=protocol, port=port):
+                        expected = "REJECT-NO-DROP" if protocol == "UDP" and port == 443 else "PROXY"
+                        self.assertEqual(base.route(self.after_rules, ip=address, protocol=protocol, port=port), expected)
+        for address in ("153.61.223.255", "153.61.228.0"):
+            for protocol in ("TCP", "UDP"):
+                self.assertEqual(base.route(self.after_rules, ip=address, protocol=protocol),
+                                 base.route(self.before_rules, ip=address, protocol=protocol))
+
     def test_shared_rules_dns_and_rewrite_are_unchanged(self):
-        self.assertEqual(self.after_rules[3:], self.before_rules)
+        self.assertEqual(self.after_rules[8:], self.before_rules)
         for section in ("General", "URL Rewrite"):
             self.assertEqual(self.before_sections[section], self.after_sections[section])
         self.assertEqual(self.info["inputs"], self.shared_info["inputs"])
@@ -55,7 +70,8 @@ class IOSOnlyTests(unittest.TestCase):
         self.assertEqual(self.info["shared_output"], self.shared_info["output"])
         self.assertEqual(self.info["shared_rules"], self.shared_info["rules"])
         self.assertEqual(self.info["output"]["sha256"], base.sha256(self.output))
-        self.assertEqual(self.info["rules"]["custom"], 74)
+        self.assertEqual(self.info["rules"]["custom"], 79)
+        self.assertEqual(self.info["rules"]["ios_only"], 8)
 
     def test_android_payloads_do_not_inherit_ios_additions(self):
         services = (base.ROOT / "Rules/Android-services.list").read_text(encoding="utf-8")
@@ -69,7 +85,8 @@ class IOSOnlyTests(unittest.TestCase):
     def test_overlay_is_idempotent_and_rejects_unreviewed_inputs(self):
         self.assertEqual(ios.build(self.output, self.info, self.extra), (self.output, self.info))
         for extra in ("", self.extra.replace("DST-PORT,443", "DST-PORT,53", 1),
-                      self.extra.replace("1.1.1.1/32", "1.1.1.0/24", 1)):
+                      self.extra.replace("1.1.1.1/32", "1.1.1.0/24", 1),
+                      self.extra.replace("153.61.224.0/22", "153.61.224.0/21", 1)):
             with self.subTest(), self.assertRaises(base.BuildError):
                 ios.build(self.shared, self.shared_info, extra)
         with self.assertRaises(base.BuildError):

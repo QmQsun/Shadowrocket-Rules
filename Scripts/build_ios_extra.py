@@ -12,8 +12,13 @@ else:
 
 EXPECTED_RULES = [
     "AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),REJECT-NO-DROP",
+    "AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,153.61.224.0/22,no-resolve)),REJECT-NO-DROP",
+    "AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.app)),REJECT-NO-DROP",
+    "AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,cloudflare-cn.com)),REJECT-NO-DROP",
     "AND,((PROTOCOL,TCP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),PROXY",
+    "DOMAIN-SUFFIX,claude.app,PROXY",
     "DOMAIN-SUFFIX,cloudflare-cn.com,PROXY",
+    "IP-CIDR,153.61.224.0/22,PROXY,no-resolve",
 ]
 
 
@@ -22,7 +27,7 @@ def build(data, info, extra_text):
         raise base.BuildError("iOS source checksum mismatch")
     lines = base.active(extra_text.splitlines())
     if lines != EXPECTED_RULES:
-        raise base.BuildError("iOS-only rules differ from the reviewed three-rule scope")
+        raise base.BuildError("iOS-only rules differ from the reviewed eight-rule scope")
     extra_hash = base.sha256(extra_text.encode())
     if "ios_only" in info:
         if info["ios_only"]["sha256"] != extra_hash:
@@ -42,9 +47,15 @@ def build(data, info, extra_text):
         for port in (53, 80, 853, 3478):
             if base.route(merged, ip="1.1.1.1", protocol=protocol, port=port) != base.route(shared, ip="1.1.1.1", protocol=protocol, port=port):
                 raise base.BuildError("iOS addition changed a non-443 port")
-        for host in ("cloudflare-cn.com", "sub.cloudflare-cn.com"):
-            if base.route(merged, host=host, protocol=protocol) != "PROXY":
+        for host in ("cloudflare-cn.com", "sub.cloudflare-cn.com", "claude.app", "sub.claude.app"):
+            expected = "REJECT-NO-DROP" if protocol == "UDP" else "PROXY"
+            if base.route(merged, host=host, protocol=protocol) != expected:
                 raise base.BuildError("iOS suffix route did not win")
+        for address in ("153.61.224.0", "153.61.227.255"):
+            for port in (53, 80, 443, 853, 3478):
+                expected = "REJECT-NO-DROP" if protocol == "UDP" and port == 443 else "PROXY"
+                if base.route(merged, ip=address, protocol=protocol, port=port) != expected:
+                    raise base.BuildError("iOS supplemental network route did not win")
     block = ("# BEGIN iOS-only rules\n" + "\n".join(lines)
              + "\n# END iOS-only rules\n\n")
     output = text.replace("[Rule]\n", "[Rule]\n" + block, 1).encode("utf-8")
