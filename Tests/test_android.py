@@ -16,16 +16,28 @@ class AndroidTests(unittest.TestCase):
         cls.custom = (base.ROOT / "Rules/Overrides.list").read_text(encoding="utf-8")
         cls.services = (base.ROOT / "Rules/Android-services.list").read_text(encoding="utf-8")
         cls.direct = (base.ROOT / "Rules/Android-direct.list").read_text(encoding="utf-8")
-        cls.files, cls.manifest = android.build(cls.ios, cls.info, cls.custom, cls.services, cls.direct)
+        cls.extra = (base.ROOT / "Rules/Android-extra.list").read_text(encoding="utf-8")
+        cls.files, cls.manifest = android.build(cls.ios, cls.info, cls.custom, cls.services, cls.direct, cls.extra)
 
     def test_priority_translation_preserves_scope_and_policy(self):
         reject = json.loads(self.files["Priority-reject.yaml"])["payload"]
         proxy = json.loads(self.files["Priority-proxy.yaml"])["payload"]
-        self.assertEqual(len(reject), 33)
-        self.assertEqual(len(proxy), 38)
+        self.assertEqual(len(reject), 43)
+        self.assertEqual(len(proxy), 48)
         self.assertIn("AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR6,2607:6bc0::/48,no-resolve))", reject)
         self.assertIn("IP-CIDR6,2607:6bc0::/48,no-resolve", proxy)
         self.assertIn("DOMAIN-SUFFIX,oaistatic.com", proxy)
+        self.assertIn("IP-CIDR,153.61.224.0/22,no-resolve", proxy)
+        self.assertIn("AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,153.61.224.0/22,no-resolve))", reject)
+        self.assertIn("AND,((NETWORK,tcp),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve))", proxy)
+        for host in ("featuregates.org", "api.statsigcdn.com", "featureassets.org",
+                     "assetsconfigcdn.org", "prodregistryv2.org", "beyondwickedmapping.org"):
+            self.assertIn("DOMAIN," + host, proxy)
+            self.assertNotIn("DOMAIN-SUFFIX," + host, proxy)
+            self.assertIn(f"AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,{host}))", reject)
+        self.assertEqual(proxy.count("DOMAIN-SUFFIX,segment.com"), 1)
+        self.assertEqual(len(proxy), len(set(proxy)))
+        self.assertEqual(len(reject), len(set(reject)))
         for line in reject + proxy:
             self.assertNotIn("PROTOCOL", line)
             self.assertNotIn("REJECT-NO-DROP", line)
@@ -62,7 +74,7 @@ class AndroidTests(unittest.TestCase):
             data = self.files[name + ".yaml"]
             self.assertEqual(base.sha256(data), details["sha256"])
             self.assertEqual(len(json.loads(data)["payload"]), details["rules"])
-        self.assertEqual(android.build(self.ios, self.info, self.custom, self.services, self.direct),
+        self.assertEqual(android.build(self.ios, self.info, self.custom, self.services, self.direct, self.extra),
                          (self.files, self.manifest))
 
     def test_changed_or_unvalidated_inputs_fail(self):
@@ -70,7 +82,11 @@ class AndroidTests(unittest.TestCase):
                                       (self.ios, self.custom + "# changed", self.services),
                                       (self.ios, self.custom, self.services.replace(",PROXY", ",DIRECT", 1))):
             with self.subTest(), self.assertRaises(base.BuildError):
-                android.build(ios, self.info, custom, services, self.direct)
+                android.build(ios, self.info, custom, services, self.direct, self.extra)
+        for extra in ("", self.extra.replace("153.61.224.0/22", "153.61.224.0/21"),
+                      self.extra.replace("DOMAIN,featuregates.org", "DOMAIN-SUFFIX,featuregates.org")):
+            with self.subTest(), self.assertRaises(base.BuildError):
+                android.build(self.ios, self.info, self.custom, self.services, self.direct, extra)
 
     def test_failed_android_publication_restores_prior_files(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -97,6 +113,8 @@ class AndroidTests(unittest.TestCase):
         for item in config["rule-providers"].values():
             self.assertEqual(item["proxy"], "PROXY")
             self.assertEqual(item["interval"], 86400)
+        for name in ("Priority-reject", "Priority-proxy"):
+            self.assertEqual(config["rule-providers"][name]["path"], "./Rules/" + name + "-v20.yaml")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@
 
 安卓版本默认使用全局模式，`GLOBAL` 组固定指向手动选择的 `PROXY` 组，两种模式共用同一个节点选择。公开仓库只包含规则和占位模板，不包含可用的节点账号或订阅凭据。
 
+本安卓版用于日常海外访问，不承担大陆线路的服务阻断用途。当前规则版本为 v20；已有用户更新完整配置后重新连接，优先规则会使用新的 `-v20.yaml` 本地缓存路径下载，避免继续使用旧的优先规则缓存。订阅入口、默认模式和手动选节点方式保持原样。
+
 ## 导入与首次连接
 
 1. 将为自己生成的私有 `Android-PandaFan.yaml` 传到安卓手机，在 Clash Meta「配置」中从文件导入并启用。无需删除原来的配置。
@@ -22,15 +24,15 @@
 | 顺序 | 规则 | 策略 |
 |---|---|---|
 | 1 | 明确的本机、局域网地址 | DIRECT |
-| 2 | 共享的定向 UDP 443 条件 | REJECT |
-| 3 | 共享优先域名及接入网段 | PROXY |
+| 2 | 共享及 v20 补充的定向 UDP 443 条件 | REJECT |
+| 3 | 共享及 v20 补充的优先域名、接入网段和 HTTPS 条件 | PROXY |
 | 4 | 上游广告过滤 | REJECT |
 | 5 | 桌面配置提取的 56 条通用服务域名 | PROXY |
 | 6 | 桌面配置提取的 4 条通用直连域名 | DIRECT |
 | 7 | GeoIP 中国地址 | DIRECT |
 | 8 | 其他流量 | PROXY |
 
-优先规则与 iOS 共用 `Rules/Overrides.list`。安卓按 Mihomo 语法生成 `NETWORK,udp`、`IP-CIDR6` 及 `REJECT`，不照搬 iOS 的关键字。服务分流分别保存在 `Rules/Android-services.list` 和 `Rules/Android-direct.list`。Google 组中的广告域名仍先经过广告过滤，不会因通用服务规则而被整体放行。
+基础优先规则与 iOS 共用 `Rules/Overrides.list`，v20 的独立补充保存在 `Rules/Android-extra.list`。安卓按 Mihomo 语法生成 `NETWORK,udp/tcp`、`IP-CIDR6` 及 `REJECT`，不照搬 iOS 的关键字。补充包含新接入网段、服务根域和六个精确辅助主机；`1.1.1.1` 仅增加 TCP/UDP 443 条件，其他端口保留原有分流。服务分流分别保存在 `Rules/Android-services.list` 和 `Rules/Android-direct.list`。Google 组中的广告域名仍先经过广告过滤，不会因通用服务规则而被整体放行。
 
 手机版不复制 Windows 进程、RDP 私有地址、Bloomberg 端口、Wind 桌面规则或 HOME 专用组；这些不是单出口手机配置的组成部分。政务及其他国内服务由中国地址直连规则处理，不保留电脑的 HOME 出口语义。通用 UDP 443 拒绝未带入手机版，仅保留共享的定向条件。
 
@@ -42,6 +44,7 @@ DNS 沿用桌面配置的主要方向：默认使用经 `PROXY` 的 Google/Cloud
 python Tests/run.py
 python Scripts/build.py
 python Scripts/build_android.py
+python Scripts/build_ios_extra.py
 ```
 
 `Android/Build-info.json` 记录每份规则集合的规则数量、SHA256 和上游提交。两种客户端全部构建成功后，工作流才以一个提交发布更新。
@@ -56,6 +59,6 @@ python Scripts/make_android_profile.py <自己的桌面配置路径>
 
 ## 验证范围
 
-2026-10-26：已用本机 Mihomo Meta v1.19.32 对规则集合形式及展开后的完整规则执行 `-t` 原生语法验证。验证使用独立目录和测试节点，没有启动新代理服务，也没有修改电脑正在使用的配置。手机上的具体内核版本、首次订阅下载、规则更新和连接出口仍需实机验证。
+2026-10-26 的初版已用本机 Mihomo Meta v1.19.32 对规则集合形式及展开后的完整规则执行 `-t` 原生语法验证。2026-11-09 的 v20 已用本机 Mihomo Meta v1.19.33 重新检查规则集合、展开规则以及规则/全局两种配置模式的语法。验证使用独立目录和测试节点，没有启动新代理服务，也没有修改电脑正在使用的配置。手机上的具体内核版本、首次订阅下载、规则更新和连接出口仍需实机验证。
 
 依据：[Mihomo 规则集合格式](https://wiki.metacubex.one/config/rule-providers/content/)、[规则集合更新设置](https://wiki.metacubex.one/config/rule-providers/)、[节点集合设置](https://wiki.metacubex.one/config/proxy-providers/)。

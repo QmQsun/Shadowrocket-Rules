@@ -73,7 +73,7 @@
       "behavior": "classical",
       "format": "yaml",
       "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Priority-reject.yaml",
-      "path": "./Rules/Priority-reject.yaml",
+      "path": "./Rules/Priority-reject-v20.yaml",
       "interval": 86400,
       "proxy": "PROXY"
     },
@@ -82,7 +82,7 @@
       "behavior": "classical",
       "format": "yaml",
       "url": "https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/Android/Priority-proxy.yaml",
-      "path": "./Rules/Priority-proxy.yaml",
+      "path": "./Rules/Priority-proxy-v20.yaml",
       "interval": 86400,
       "proxy": "PROXY"
     },

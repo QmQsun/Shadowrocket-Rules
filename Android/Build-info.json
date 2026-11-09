@@ -1,21 +1,23 @@
 {
   "schema_version": 1,
+  "ruleset_revision": "v20",
   "upstream_commit": "24b68a123ac4c25239c60370cebd4b90afd5791c",
   "source_config_sha256": "762cd6270d71b5ba9a5fb276f01b3fbd92b569478a2f8594268fa124e65b1dbb",
   "inputs": {
     "services_sha256": "4e1f213c356ff3e8b31c6e4e4225385f89bc604d8fd0f35937c9f0255259405d",
-    "direct_sha256": "a60d9dfe1f1eaf2ed029c1f71fb3e1779e702bd74bbeaa2dfb694758c51691fe"
+    "direct_sha256": "a60d9dfe1f1eaf2ed029c1f71fb3e1779e702bd74bbeaa2dfb694758c51691fe",
+    "extra_sha256": "e98270f2c7480ae90947cbb4fe44908186e5fe37e8131fe7359f976017d6468f"
   },
   "providers": {
     "Priority-reject": {
-      "rules": 33,
+      "rules": 43,
       "policy": "REJECT",
-      "sha256": "5cb023d79a5231d1277c1c00b8572f2ebca3b5d7f5b361ee57c6116ed5ecce35"
+      "sha256": "1244e1bf00545406f946890d1d38a374cecf061a400e26b72ecbd1043cfd1951"
     },
     "Priority-proxy": {
-      "rules": 38,
+      "rules": 48,
       "policy": "PROXY",
-      "sha256": "d251a0340b2dc45f9fe0845cc109cc5e428011a6b987b1728be81efdc8b5490b"
+      "sha256": "e344b4840d59bfc05d876cf322097056485a461f549741e0b7acf09b4b8a4362"
     },
     "Ads": {
       "rules": 50960,
@@ -33,5 +35,5 @@
       "sha256": "6be755c7ee609ae3e5afaef6e106da3242c044257d3d7af0a83a3a42a4371ae9"
     }
   },
-  "profile_template_sha256": "813c042445e717522aed24db9f512d7876bc1316b352714dc66afcaca4b8c0e6"
+  "profile_template_sha256": "e9a3236ab6e347e4a62430f9dac82c4b221404af89e400da475fc34fa5dd758d"
 }

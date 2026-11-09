@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
-  "source": "Reviewed desktop restrictions extracted 2026-10-30, with supplemental domain and HTTPS rules added 2026-11-09",
+  "source": "Reviewed desktop policy v20 (2026-11-09), with cloudflare-cn.com and 1.1.1.1 proxy exceptions",
   "inputs": {
     "general_sha256": "7512f5e620bb47bc06c704becec62cfca10665e5a0b5919e68618dcea7ad9cf1",
-    "deny_sha256": "e636334c69fae0a2295deae2b5c1d79f757cf998108941059216e603bdc63111",
+    "deny_sha256": "7d413756d17e920a5ef076850ef5362d8060e2116a90a478997b27a987de1c46",
     "transport_sha256": "25fd25c78ba0f068e697b9c36e534c88354be52507cf9862f94734d806dd129a"
   },
   "rules": {
-    "domain_or_keyword": 30,
-    "ip_networks": 2,
-    "restricted": 32,
+    "domain_or_keyword": 37,
+    "ip_networks": 3,
+    "restricted": 40,
     "transport": 2,
-    "total": 35
+    "total": 43
   },
   "output": {
     "filename": "sr_mainland.conf",
-    "sha256": "69bf18b73f0af5e99b5a2544ea31d8bb8a73ab39123374df1b11379c4ec0cb87",
-    "bytes": 2254
+    "sha256": "3f48ef65fbe7598772d846c76ff6e02e08fec0b6a5ff74d27a68d67ae68273a3",
+    "bytes": 2523
   },
   "required_routing_mode": "config",
   "proxy_mode_protection": false,

@@ -1,6 +1,7 @@
-# Reviewed destination restrictions. Use with Config routing mode only.
+# Reviewed v20 destination restrictions. Use with Config routing mode only.
 DOMAIN-SUFFIX,claude.ai,REJECT
 DOMAIN-SUFFIX,claude.com,REJECT
+DOMAIN-SUFFIX,claude.app,REJECT
 DOMAIN,api.anthropic.com,REJECT
 DOMAIN-SUFFIX,anthropic.com,REJECT
 DOMAIN-SUFFIX,anthropic-cdn.com,REJECT
@@ -16,18 +17,25 @@ DOMAIN,anthropic-com.ghost.io,REJECT
 DOMAIN,servd-anthropic-website.b-cdn.net,REJECT
 DOMAIN,anthropic.com.cdn.cloudflare.net,REJECT
 DOMAIN-SUFFIX,statsigapi.net,REJECT
+DOMAIN,featuregates.org,REJECT
+DOMAIN,api.statsigcdn.com,REJECT
+DOMAIN,featureassets.org,REJECT
+DOMAIN,assetsconfigcdn.org,REJECT
+DOMAIN,prodregistryv2.org,REJECT
+DOMAIN,beyondwickedmapping.org,REJECT
 DOMAIN-SUFFIX,intercom.io,REJECT
 DOMAIN-SUFFIX,intercomcdn.com,REJECT
 DOMAIN,challenges.cloudflare.com,REJECT
 DOMAIN,static.cloudflareinsights.com,REJECT
 DOMAIN-SUFFIX,cloudflare.com,REJECT
-DOMAIN-SUFFIX,cloudflare-cn.com,REJECT
 DOMAIN-SUFFIX,usefathom.com,REJECT
 DOMAIN-KEYWORD,datadoghq,REJECT
 DOMAIN-SUFFIX,statsig.com,REJECT
 DOMAIN-SUFFIX,sentry.io,REJECT
 DOMAIN-SUFFIX,segment.io,REJECT
+DOMAIN-SUFFIX,segment.com,REJECT
 DOMAIN-SUFFIX,stripe.com,REJECT
 DOMAIN-SUFFIX,stripe.network,REJECT
 IP-CIDR,160.79.104.0/23,REJECT,no-resolve
+IP-CIDR,153.61.224.0/22,REJECT,no-resolve
 IP-CIDR,2607:6bc0::/48,REJECT,no-resolve

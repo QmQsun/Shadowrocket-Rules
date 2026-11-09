@@ -89,8 +89,9 @@ class IOSOnlyTests(unittest.TestCase):
     def test_android_payloads_do_not_inherit_ios_additions(self):
         services = (base.ROOT / "Rules/Android-services.list").read_text(encoding="utf-8")
         direct = (base.ROOT / "Rules/Android-direct.list").read_text(encoding="utf-8")
-        before, _ = android.build(self.shared, self.shared_info, self.custom, services, direct)
-        after, _ = android.build(self.output, self.info, self.custom, services, direct)
+        extra = (base.ROOT / "Rules/Android-extra.list").read_text(encoding="utf-8")
+        before, _ = android.build(self.shared, self.shared_info, self.custom, services, direct, extra)
+        after, _ = android.build(self.output, self.info, self.custom, services, direct, extra)
         for filename in before:
             if filename != "Build-info.json":
                 self.assertEqual(before[filename], after[filename], filename)

@@ -37,6 +37,16 @@
     "DOMAIN-SUFFIX,groq.com",
     "DOMAIN-SUFFIX,recaptcha.net",
     "IP-CIDR,160.79.104.0/23,no-resolve",
-    "IP-CIDR6,2607:6bc0::/48,no-resolve"
+    "IP-CIDR6,2607:6bc0::/48,no-resolve",
+    "AND,((NETWORK,tcp),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve))",
+    "DOMAIN-SUFFIX,claude.app",
+    "DOMAIN-SUFFIX,cloudflare-cn.com",
+    "DOMAIN,featuregates.org",
+    "DOMAIN,api.statsigcdn.com",
+    "DOMAIN,featureassets.org",
+    "DOMAIN,assetsconfigcdn.org",
+    "DOMAIN,prodregistryv2.org",
+    "DOMAIN,beyondwickedmapping.org",
+    "IP-CIDR,153.61.224.0/22,no-resolve"
   ]
 }

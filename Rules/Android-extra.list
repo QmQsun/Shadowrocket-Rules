@@ -1,0 +1,21 @@
+# Reviewed Android v20 additions in shared rule notation; exported as Mihomo classical providers.
+AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(IP-CIDR,153.61.224.0/22,no-resolve)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,claude.app)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN-SUFFIX,cloudflare-cn.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,featuregates.org)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,api.statsigcdn.com)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,featureassets.org)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,assetsconfigcdn.org)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,prodregistryv2.org)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DST-PORT,443),(DOMAIN,beyondwickedmapping.org)),REJECT-NO-DROP
+AND,((PROTOCOL,TCP),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve)),PROXY
+DOMAIN-SUFFIX,claude.app,PROXY
+DOMAIN-SUFFIX,cloudflare-cn.com,PROXY
+DOMAIN,featuregates.org,PROXY
+DOMAIN,api.statsigcdn.com,PROXY
+DOMAIN,featureassets.org,PROXY
+DOMAIN,assetsconfigcdn.org,PROXY
+DOMAIN,prodregistryv2.org,PROXY
+DOMAIN,beyondwickedmapping.org,PROXY
+IP-CIDR,153.61.224.0/22,PROXY,no-resolve

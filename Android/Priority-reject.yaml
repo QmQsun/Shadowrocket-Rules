@@ -32,6 +32,16 @@
     "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.com))",
     "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,stripe.network))",
     "AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,160.79.104.0/23,no-resolve))",
-    "AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR6,2607:6bc0::/48,no-resolve))"
+    "AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR6,2607:6bc0::/48,no-resolve))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,1.1.1.1/32,no-resolve))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,153.61.224.0/22,no-resolve))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,claude.app))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,cloudflare-cn.com))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,featuregates.org))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,api.statsigcdn.com))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,featureassets.org))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,assetsconfigcdn.org))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,prodregistryv2.org))",
+    "AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN,beyondwickedmapping.org))"
   ]
 }
