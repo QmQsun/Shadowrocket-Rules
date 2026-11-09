@@ -36,9 +36,19 @@ jobs:
       - name: Download fixed upstream revision and validate
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python Scripts/build.py
+          BUILD_EVENT: ${{ github.event_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$BUILD_EVENT" = "push" ]; then
+            python Scripts/build.py --reuse-upstream
+          else
+            python Scripts/build.py
+          fi
       - name: Build Android rule providers from validated inputs
         run: python Scripts/build_android.py
+      - name: Apply iOS-only additions after Android export
+        run: python Scripts/build_ios_extra.py
       - name: Publish validated configuration
         shell: bash
         run: |

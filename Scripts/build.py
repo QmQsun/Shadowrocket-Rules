@@ -70,6 +70,14 @@ def active(lines):
 def parse_rule(line):
     """Return (kind, target, policy); only accept this project's reviewed syntax."""
     if line.startswith("AND,"):
+        tcp_ip_match = re.fullmatch(
+            r"AND,\(\(PROTOCOL,TCP\),\(DST-PORT,443\),"
+            r"\(IP-CIDR,([^(),\s]+),no-resolve\)\),PROXY",
+            line,
+        )
+        if tcp_ip_match:
+            parse_rule(f"IP-CIDR,{tcp_ip_match[1]},PROXY,no-resolve")
+            return "AND-TCP", ("IP-CIDR", tcp_ip_match[1].lower()), "PROXY"
         ip_match = re.fullmatch(
             r"AND,\(\(PROTOCOL,UDP\),\(DST-PORT,443\),"
             r"\(IP-CIDR,([^(),\s]+),no-resolve\)\),REJECT-NO-DROP",
@@ -132,8 +140,8 @@ def route(rules, host="", ip=None, protocol="TCP", port=443):
     """Evaluate known rules without DNS, SNI inference or native kernel semantics."""
     address = ipaddress.ip_address(ip) if ip else None
     for kind, target, policy in rules:
-        if kind == "AND":
-            if protocol == "UDP" and port == 443:
+        if kind in ("AND", "AND-TCP"):
+            if protocol == ("UDP" if kind == "AND" else "TCP") and port == 443:
                 if target[0] == "IP-CIDR":
                     if address is not None and address in ipaddress.ip_network(target[1], strict=False):
                         return policy
@@ -264,6 +272,23 @@ def download():
                         "committed_at": commit["commit"]["committer"]["date"], "url": url}
 
 
+def download_recorded(previous):
+    """Reuse a hash-checked published source for a routing-only edit."""
+    if not previous:
+        raise BuildError("A previous source manifest is required")
+    source_info = previous["source"]
+    sha = source_info["commit"]
+    if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise BuildError("Invalid recorded upstream commit")
+    url = f"https://raw.githubusercontent.com/{UPSTREAM}/{sha}/{SOURCE_FILE}"
+    if source_info.get("url") != url:
+        raise BuildError("Recorded upstream URL is inconsistent")
+    data = fetch(url)
+    if sha256(data) != source_info["sha256"]:
+        raise BuildError("Recorded upstream checksum mismatch")
+    return data, source_info
+
+
 def publish(output_dir, output, info):
     """Stage both files before replacement; restore prior files on ordinary I/O failure.
 
@@ -303,20 +328,25 @@ def publish_files(output_dir, payloads):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--upstream-file", type=Path)
+    source_options = parser.add_mutually_exclusive_group()
+    source_options.add_argument("--upstream-file", type=Path)
+    source_options.add_argument("--reuse-upstream", action="store_true",
+                                help="Rebuild against the recorded, hash-checked upstream revision")
     parser.add_argument("--upstream-commit", help="Optional provenance for a known offline snapshot")
     parser.add_argument("--output-dir", type=Path, default=ROOT)
     args = parser.parse_args(argv)
     try:
+        previous_path = args.output_dir / "Build-info.json"
+        previous = json.loads(previous_path.read_text()) if previous_path.exists() else None
         if args.upstream_commit and not re.fullmatch(r"[0-9a-f]{40}", args.upstream_commit):
             raise BuildError("Invalid offline commit SHA")
         if args.upstream_file:
             source = args.upstream_file.read_bytes()
             source_info = {"mode": "offline", "repository": UPSTREAM, "commit": args.upstream_commit}
+        elif args.reuse_upstream:
+            source, source_info = download_recorded(previous)
         else:
             source, source_info = download()
-        previous_path = args.output_dir / "Build-info.json"
-        previous = json.loads(previous_path.read_text()) if previous_path.exists() else None
         output, info = build(source, (ROOT / "Config/Local.conf").read_text(encoding="utf-8"),
                              (ROOT / "Rules/Overrides.list").read_text(encoding="utf-8"), source_info, previous)
         publish(args.output_dir, output, info)

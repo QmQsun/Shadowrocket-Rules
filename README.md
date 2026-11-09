@@ -19,7 +19,7 @@ https://raw.githubusercontent.com/QmQsun/Shadowrocket-Rules/main/sr_ios_adblock.
 - GitHub Actions 每周一 04:17（Asia/Shanghai，UTC+8）检查上游；实际触发可能延迟。
 - 在仓库 Actions 中选择 `Update mobile ad-blocking rules → Run workflow` 可手动更新。
 - 修改 `Rules/Overrides.list`、`Config/Local.conf` 或构建相关文件后，推送到 `main` 也会触发更新。
-- 每次先解析上游提交 SHA，再下载该固定提交。`Build-info.json` 记录来源、输入及输出 SHA256 和规则数量。
+- 定时或手动更新先解析上游提交 SHA，再下载该固定提交。推送本地规则改动时，使用上次发布的固定上游版本并核对 SHA256，避免同时引入无关的上游变化。`Build-info.json` 记录来源、输入及输出 SHA256 和规则数量。
 - 校验不通过时，工作流失败并保留远端已有配置。没有内容变化时不产生新提交。
 - 公开仓库长期没有活动时，GitHub 可能停用定时工作流；届时在 Actions 中重新启用。每周检查不代表上游一定有新的规则。
 
@@ -35,6 +35,7 @@ git pull --ff-only
 python Tests/run.py
 python Scripts/build.py
 python Scripts/build_android.py
+python Scripts/build_ios_extra.py
 ```
 
 原始快照的离线构建：
@@ -50,12 +51,16 @@ python Scripts/build.py --upstream-file Upstream/Original-20261026.conf --upstre
 | `sr_ios_adblock.conf` | 手机下载的完整配置 |
 | `Config/Local.conf` | 固定通用设置、更新地址和 URL Rewrite |
 | `Rules/Overrides.list` | 优先于上游的本地规则 |
+| `Rules/iOS-only.list` | 只加入 iOS 成品的补充规则，不导出到安卓或大陆版 |
 | `Scripts/build.py` | 固定版本下载、合并及验证 |
+| `Scripts/build_ios_extra.py` | 安卓导出后为 iOS 成品加入专用补充规则 |
 | `Tests/` | 真实快照、路由边界及失败保留测试 |
 | `Upstream/Original-20261026.*` | 首次下载的原始快照及来源记录 |
 | `Build-info.json` | 当前产物的校验信息 |
 
 通用设置和 URL Rewrite 只从本地配置读取，周更不采用上游的对应设置。本地规则排在上游前面；只删除与本地规则类型、目标完全相同的上游条目，其余保留原顺序。`FINAL,DIRECT` 必须唯一且位于规则末尾。
+
+构建顺序为共享基础配置、安卓导出、iOS 专用补充。iOS 专用层将 `1.1.1.1` 的 TCP 443 交给 `PROXY`，拒绝其 UDP 443，并将 `cloudflare-cn.com` 及子域名交给 `PROXY`；不会把 `1.1.1.1` 的其他端口一并改成代理。`Build-info.json` 的 `shared_output` 保留安卓导出所用基础配置的校验信息，`output` 对应最终 iOS 文件。
 
 上游结构、规则类型、策略或数量出现异常会中止构建。当前数量范围为 50,000–80,000，相比上次构建变化超过 10% 也需要人工审阅，不能直接放宽验证绕过失败。
 
